@@ -1,6 +1,5 @@
 # Dual Encoding for Zero-Example Video Retrieval
-
-This is Pytorch implementation of paper [Dual Encoding for Zero-Example Video Retrieval](https://arxiv.org/abs/1809.06181). Moreover, it is our winning solution for Matching and Ranking subtask of Video to Text Description in [TRECVID 2018](https://www-nlpir.nist.gov/projects/tv2018/Tasks/vtt/).
+Source code of our CVPR'19  paper [Dual Encoding for Zero-Example Video Retrieval](https://arxiv.org/abs/1809.06181).
 
 ![image](dual_encoding.jpg)
 

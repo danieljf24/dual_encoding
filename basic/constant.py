@@ -1,8 +1,7 @@
 import os
 import logging
 
-ROOT_PATH=os.path.join(os.environ['HOME'], 'VisualSearch', 'dual_encoding_data')
-# ROOT_PATH=os.path.join(os.environ['HOME'], 'VisualSearch', 'trecvid2018')
+ROOT_PATH=os.path.join(os.environ['HOME'], 'VisualSearch')
 
 logger = logging.getLogger(__file__)
 logging.basicConfig(
