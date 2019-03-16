@@ -57,12 +57,12 @@ Run the following script to evaluate our trained [model]()  on MSR-VTT.
 source ~/ws_dual/bin/activate
 MODELDIR=$HOME/VisualSearch/msrvtt10ktrain/cvpr_2019
 mkdir -p $MODELDIR
-wget -P MODELDIR /url
+wget -P MODELDIR http://lixirong.net/data/cvpr2019/model_best.pth.tar
 CUDA_VISIBLE_DEVICES=0 python tester.py msrvtt10ktest --logger_name $MODELDIR
 deactive
 ```
 
-The performance of Dual Encoding on MSR-VTT is as follows. Notice that due to random factors in SGD based training, the numbers differ slightly from those reported in the paper.
+The expected performance of Dual Encoding on MSR-VTT is as follows. Notice that due to random factors in SGD based training, the numbers differ slightly from those reported in the paper.
 
 |  | R@1 | R@5 | R@10 | Med r |	mAP |
 | ------------- | ------------- | ------------- | ------------- |  ------------- | ------------- |
