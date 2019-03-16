@@ -10,9 +10,9 @@ import numpy as np
 import torch
 
 import evaluation
-import data_provider as data
-from vocab import Vocabulary
-from text2vec import get_text_encoder
+import util.data_provider as data
+from util.vocab import Vocabulary
+from util.text2vec import get_text_encoder
 from model import get_model, get_we_parameter
 
 import logging
@@ -254,7 +254,7 @@ def main():
         fout.write('best performance on validation: ' + str(best_rsum))
 
     # generate evaluation shell script
-    templete = ''.join(open( 'TEMPLATE_do_test.sh'  ).readlines())
+    templete = ''.join(open( 'util/TEMPLATE_do_test.sh').readlines())
     striptStr = templete.replace('@@@rootpath@@@', rootpath)
     striptStr = striptStr.replace('@@@testCollection@@@', testCollection)
     striptStr = striptStr.replace('@@@logger_name@@@', opt.logger_name)
@@ -262,9 +262,9 @@ def main():
     striptStr = striptStr.replace('@@@n_caption@@@', str(opt.n_caption))
 
     # perform evaluation on test set
-    # runfile = 'do_test_%s_%s.sh' % (opt.model, testCollection)
-    # open(runfile, 'w').write(striptStr + '\n')
-    # os.system('chmod +x %s' % runfile)
+    runfile = 'do_test_%s_%s.sh' % (opt.model, testCollection)
+    open(runfile, 'w').write(striptStr + '\n')
+    os.system('chmod +x %s' % runfile)
     # os.system('./'+runfile)
 
 
@@ -321,12 +321,6 @@ def validate(opt, val_loader, model, measure='cosine'):
 
     c2i_all_errors = evaluation.cal_error(video_embs, cap_embs, measure)
     if opt.val_metric == "recall":
-        # caption retrieval
-        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=opt.n_caption)
-        print(" * Video to text:")
-        print(" * r_1_5_10: {}".format([round(r1, 3), round(r5, 3), round(r10, 3)]))
-        print(" * medr, meanr: {}".format([round(medr, 3), round(meanr, 3)]))
-        print(" * "+'-'*10)
 
         # video retrieval
         (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=opt.n_caption)
@@ -335,6 +329,12 @@ def validate(opt, val_loader, model, measure='cosine'):
         print(" * medr, meanr: {}".format([round(medri, 3), round(meanri, 3)]))
         print(" * "+'-'*10)
 
+        # caption retrieval
+        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=opt.n_caption)
+        print(" * Video to text:")
+        print(" * r_1_5_10: {}".format([round(r1, 3), round(r5, 3), round(r10, 3)]))
+        print(" * medr, meanr: {}".format([round(medr, 3), round(meanr, 3)]))
+        print(" * "+'-'*10)
 
         # record metrics in tensorboard
         tb_logger.log_value('r1', r1, step=model.Eiters)

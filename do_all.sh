@@ -7,7 +7,7 @@ overwrite=0
 ./do_get_vocab.sh $trainCollection
 
 # training
-gpu=1
+gpu=0
 CUDA_VISIBLE_DEVICES=$gpu python trainer.py $trainCollection $valCollection $testCollection  --overwrite $overwrite \
                                             --max_violation --text_norm --visual_norm 
                                             

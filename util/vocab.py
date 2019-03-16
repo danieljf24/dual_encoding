@@ -1,6 +1,5 @@
 # Create a vocabulary wrapper
 from __future__ import print_function
-import nltk
 import pickle
 from collections import Counter
 import json
@@ -8,7 +7,6 @@ import argparse
 import os
 import sys
 import re
-from nltk.corpus import stopwords
 
 from basic.constant import ROOT_PATH, logger
 from basic.common import makedirsforfile, checkToSkip

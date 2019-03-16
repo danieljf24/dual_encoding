@@ -1,10 +1,9 @@
 import os
 import sys
 import numpy as np
-from simpleknn.bigfile import BigFile
 from basic.constant import ROOT_PATH
 from basic.common import checkToSkip, makedirsforfile
-from simpleknn.txt2bin import process as text2bin
+from simpleknn.bigfile import BigFile
 
 
 def read_dict(filepath):

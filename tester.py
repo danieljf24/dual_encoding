@@ -6,10 +6,10 @@ import sys
 import torch
 
 import evaluation
-import data_provider as data
-from vocab import Vocabulary
-from text2vec import get_text_encoder
 from model import get_model
+import util.data_provider as data
+from util.vocab import Vocabulary
+from util.text2vec import get_text_encoder
 
 import logging
 import json
@@ -32,7 +32,6 @@ def parse_args():
     parser.add_argument('--workers', default=5, type=int, help='Number of data loader workers.')
     parser.add_argument('--logger_name', default='runs', help='Path to save the model and Tensorboard log.')
     parser.add_argument('--checkpoint_name', default='model_best.pth.tar', type=str, help='name of checkpoint (default: model_best.pth.tar)')
-    parser.add_argument('--evaluate', action='store_true', help='flag of conducting evaluation')
     parser.add_argument('--n_caption', type=int, default=20, help='number of captions of each image/video (default: 1)')
 
     args = parser.parse_args()
@@ -107,23 +106,28 @@ def main():
 
     c2i_all_errors = evaluation.cal_error(video_embs, cap_embs, options.measure)
     torch.save({'errors': c2i_all_errors, 'videos': video_ids, 'captions': caption_ids}, pred_error_matrix_file)    
-    print(c2i_all_errors.shape)
     print("write into: %s" % pred_error_matrix_file)
 
-    if opt.evaluate:
-        # caption retrieval
-        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=n_caption)
-        print(" * Video to text:")
-        print(" * r_1_5_10, medr, meanr: {}".format([round(r1, 1), round(r5, 1), round(r10, 1), round(medr, 1), round(meanr, 1)]))
-        print(" * recall sum: {}".format(round(r1+r5+r10, 1)))
-        print(" * "+'-'*10)
+    # caption retrieval
+    (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=n_caption)
+    i2t_map_score = evaluation.i2t_map(c2i_all_errors, n_caption=n_caption)
 
-        # video retrieval
-        (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=n_caption)
-        print(" * Text to Video:")
-        print(" * r_1_5_10, medr, meanr: {}".format([round(r1i, 1), round(r5i, 1), round(r10i, 1), round(medri, 1), round(meanri, 1)]))
-        print(" * recall sum: {}".format(round(r1i+r5i+r10i, 1)))
-        print(" * "+'-'*10)
+    # video retrieval
+    (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=n_caption)
+    t2i_map_score = evaluation.t2i_map(c2i_all_errors, n_caption=n_caption)
+    print(" * Text to Video:")
+    print(" * r_1_5_10, medr, meanr: {}".format([round(r1i, 1), round(r5i, 1), round(r10i, 1), round(medri, 1), round(meanri, 1)]))
+    print(" * recall sum: {}".format(round(r1i+r5i+r10i, 1)))
+    print(" * mAP: {}".format(round(t2i_map_score, 3)))
+    print(" * "+'-'*10)
+
+    # caption retrieval
+    print(" * Video to text:")
+    print(" * r_1_5_10, medr, meanr: {}".format([round(r1, 1), round(r5, 1), round(r10, 1), round(medr, 1), round(meanr, 1)]))
+    print(" * recall sum: {}".format(round(r1+r5+r10, 1)))
+    print(" * mAP: {}".format(round(i2t_map_score, 3)))
+    print(" * "+'-'*10)
+
 
 
 if __name__ == '__main__':

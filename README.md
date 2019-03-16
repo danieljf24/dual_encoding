@@ -5,30 +5,32 @@ Source code of our CVPR'19  paper [Dual Encoding for Zero-Example Video Retrieva
 
 ## Requirements
 
-#### Main Required Packages
+#### Environments
+* **Ubuntu** 16.04
+* **CUDA** 10.0
 * **python** 2.7
 * **torch** 0.3.1
 
 We used virtualenv to setup a deep learning workspace that supports PyTorch.
 Run the following script to install the required packages.
 ```shell
-virtualenv --system-site-packages ~/ws_dual
+virtualenv --system-site-packages -p python2.7 ~/ws_dual
 source ~/ws_dual/bin/activate
 cd ~/dual_encoding
-pip install -r requirements.txt
+pip install -r util/requirements.txt
 deactivate
 ```
 
 #### Required Data
-Run `do_get_dataset.sh` or the following script to download and extract MSR-VTT() dataset and a pre-trained word2vec(3.0G).
+Run `do_get_dataset.sh` or the following script to download and extract MSR-VTT(1.9G) dataset and a pre-trained word2vec(3.0G).
 The extracted data is placed in `$HOME/VisualSearch/`.
 ```shell
 ROOTPATH=$HOME/VisualSearch
 mkdir -p $ROOTPATH && cd $ROOTPATH
 
 # download and extract dataset
-wget http://lixirong.net/data/dual_encoding/msrvtt10k.tar.gz
-tar zxf msrvtt10k.tar.gz
+wget http://lixirong.net/data/cvpr2019/msrvtt10k-text-and-resnet-152-img1k.tar.gz
+tar zxf msrvtt10k-text-and-resnet-152-img1k.tar.gz
 
 # download and extract pre-trained word2vec
 wget http://lixirong.net/data/w2vv-tmm2018/word2vec.tar.gz
@@ -50,12 +52,22 @@ Running the script will do the following things:
 
 
 ## Expected Performance
-The performance of Dual Encoding on MSR-VTT is as follows, with the code run on a Ubuntu 16.04 machine with CUDA 10.0. Notice that due to random factors in SGD based training,  the performance differs slightly for each run.
+Run the following script to evaluate our trained [model]()  on MSR-VTT.
+```shell
+source ~/ws_dual/bin/activate
+MODELDIR=$HOME/VisualSearch/msrvtt10ktrain/cvpr_2019
+mkdir -p $MODELDIR
+wget -P MODELDIR /url
+CUDA_VISIBLE_DEVICES=0 python tester.py msrvtt10ktest --logger_name $MODELDIR
+deactive
+```
+
+The performance of Dual Encoding on MSR-VTT is as follows. Notice that due to random factors in SGD based training, the numbers differ slightly from those reported in the paper.
 
 |  | R@1 | R@5 | R@10 | Med r |	mAP |
 | ------------- | ------------- | ------------- | ------------- |  ------------- | ------------- |
-| Text-to-Video | 7.7  | 22.0 | 31.8 | 32 | 0.155 |
-| Video-to-Text | 13.0 | 30.8 | 43.3 | 15 | 0.065 |
+| Text-to-Video | 7.6  | 22.4 | 31.8 | 33 | 0.155 |
+| Video-to-Text | 12.8 | 30.3 | 42.4 | 16 | 0.065 |
 
 
 

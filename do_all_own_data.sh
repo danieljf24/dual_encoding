@@ -12,7 +12,7 @@ overwrite=0
 ./do_get_frameInfo.sh $trainCollection $visual_feature
 
 # training
-gpu=1
+gpu=0
 CUDA_VISIBLE_DEVICES=$gpu python trainer.py $trainCollection $valCollection $testCollection --overwrite $overwrite \
                                             --max_violation --text_norm --visual_norm --visual_feature $visual_feature --n_caption $n_caption
 
