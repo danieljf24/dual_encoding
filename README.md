@@ -16,6 +16,7 @@ Run the following script to install the required packages.
 ```shell
 virtualenv --system-site-packages -p python2.7 ~/ws_dual
 source ~/ws_dual/bin/activate
+git clone https://github.com/danieljf24/dual_encoding.git
 cd ~/dual_encoding
 pip install -r util/requirements.txt
 deactivate
@@ -52,7 +53,7 @@ Running the script will do the following things:
 
 
 ## Expected Performance
-Run the following script to evaluate our trained [model]()  on MSR-VTT.
+Run the following script to evaluate our trained [model](http://lixirong.net/data/cvpr2019/model_best.pth.tar)  on MSR-VTT.
 ```shell
 source ~/ws_dual/bin/activate
 MODELDIR=$HOME/VisualSearch/msrvtt10ktrain/cvpr_2019
@@ -89,7 +90,7 @@ ${subset_name}
 
 ```
 
-* `FeatureData`: video frame features. Using [txt2bin.py](simpleknn/txt2bin.py) to convert video frame feature in the required binary format.
+* `FeatureData`: video frame features. Using [txt2bin.py](https://github.com/danieljf24/simpleknn/blob/master/txt2bin.py) to convert video frame feature in the required binary format.
 * `${subset_name}.txt`: all video IDs in the specific subset, one video ID per line.
 * `${dsubset_name}.caption.txt`: caption data. The file structure is as follows, in which the video and sent in the same line are relevant.
 ```

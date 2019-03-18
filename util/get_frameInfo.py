@@ -3,7 +3,7 @@ import sys
 import numpy as np
 from basic.constant import ROOT_PATH
 from basic.common import checkToSkip, makedirsforfile
-from simpleknn.bigfile import BigFile
+from basic.bigfile import BigFile
 
 
 def read_dict(filepath):

@@ -28,13 +28,13 @@ def euclidean_sim(im, s):
     return score    
 
 
-class ContrastiveLoss(nn.Module):
+class TripletLoss(nn.Module):
     """
-    Compute contrastive loss
+    triplet ranking loss
     """
 
     def __init__(self, margin=0, measure=False, max_violation=False, cost_style='sum', direction='all'):
-        super(ContrastiveLoss, self).__init__()
+        super(TripletLoss, self).__init__()
         self.margin = margin
         self.cost_style = cost_style
         self.direction = direction

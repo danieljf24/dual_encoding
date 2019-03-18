@@ -9,7 +9,7 @@ from torch.nn.utils.clip_grad import clip_grad_norm  # clip_grad_norm_ for 0.4.0
 import numpy as np
 from collections import OrderedDict
 import torch.nn.functional as F
-from loss import *
+from loss import TripletLoss
 from basic.bigfile import BigFile
 
 
@@ -316,7 +316,7 @@ class Dual_Encoding(BaseModel):
 
         # Loss and Optimizer
         if opt.loss_fun == 'mrl':
-            self.criterion = ContrastiveLoss(margin=opt.margin,
+            self.criterion = TripletLoss(margin=opt.margin,
                                             measure=opt.measure,
                                             max_violation=opt.max_violation,
                                             cost_style=opt.cost_style,
