@@ -269,7 +269,10 @@ class BaseModel(object):
         """Compute the loss given pairs of video and caption embeddings
         """
         loss = self.criterion(cap_emb, vid_emb)
-        self.logger.update('Le', loss.data[0], vid_emb.size(0))  # loss.item() for 0.4.0, loss.data[0] for 0.3.1
+        if torch.__version__ == '0.3.1':  # loss.item() for 0.4.0, loss.data[0] for 0.3.1
+            self.logger.update('Le', loss.data[0], vid_emb.size(0)) 
+        else:
+            self.logger.update('Le', loss.item(), vid_emb.size(0)) 
         return loss
 
     def train_emb(self, videos, captions, lengths, *args):
@@ -285,8 +288,11 @@ class BaseModel(object):
         # measure accuracy and record loss
         self.optimizer.zero_grad()
         loss = self.forward_loss(cap_emb, vid_emb)
-
-        loss_value = loss.data[0]
+        
+        if torch.__version__ == '0.3.1':
+            loss_value = loss.data[0]
+        else:
+            loss.item()
 
         # compute gradient and do SGD step
         loss.backward()
