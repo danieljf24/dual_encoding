@@ -62,6 +62,8 @@ def main():
     print("=> loaded checkpoint '{}' (epoch {}, best_rsum {})"
           .format(resume, start_epoch, best_rsum))
     options = checkpoint['opt']
+    if not hasattr(options, 'concate'):
+        setattr(options, "concate", "full")
 
     trainCollection = options.trainCollection
     output_dir = resume.replace(trainCollection, testCollection)

@@ -105,6 +105,7 @@ class Video_multilevel_encoding(nn.Module):
         self.rnn_output_size = opt.visual_rnn_size*2
         self.dropout = nn.Dropout(p=opt.dropout)
         self.visual_norm = opt.visual_norm
+        self.concate = opt.concate
 
         # visual bidirectional rnn encoder
         self.rnn = nn.GRU(opt.visual_feat_dim, opt.visual_rnn_size, batch_first=True, bidirectional=True)
@@ -145,7 +146,10 @@ class Video_multilevel_encoding(nn.Module):
         con_out = self.dropout(con_out)
 
         # concatenation
-        features = torch.cat((gru_out,con_out,org_out), 1)
+        if self.concate == 'full': # level 1+2+3
+            features = torch.cat((gru_out,con_out,org_out), 1)
+        elif self.concate == 'reduced':  # level 2+3
+            features = torch.cat((gru_out,con_out), 1)
 
         # mapping to common space
         features = self.visual_mapping(features)
@@ -179,6 +183,7 @@ class Text_multilevel_encoding(nn.Module):
         self.we_parameter = opt.we_parameter
         self.rnn_output_size = opt.text_rnn_size*2
         self.dropout = nn.Dropout(p=opt.dropout)
+        self.concate = opt.concate
         
         # visual bidirectional rnn encoder
         self.embed = nn.Embedding(opt.vocab_size, opt.word_dim)
@@ -230,7 +235,10 @@ class Text_multilevel_encoding(nn.Module):
         con_out = self.dropout(con_out)
 
         # concatenation
-        features = torch.cat((gru_out,con_out,org_out), 1)
+        if self.concate == 'full': # level 1+2+3
+            features = torch.cat((gru_out,con_out,org_out), 1)
+        elif self.concate == 'reduced': # level 2+3
+            features = torch.cat((gru_out,con_out), 1)
         
         # mapping to common space
         features = self.text_mapping(features)

@@ -41,6 +41,7 @@ def parse_args():
     parser.add_argument('--overwrite', type=int, default=0, choices=[0,1], help='overwrite existed file. (default: 0)')
     # model
     parser.add_argument('--model', type=str, default='dual_encoding', help='model name. (default: dual_encoding)')
+    parser.add_argument('--concate', type=str, default='full', help='feature concatenation style. (full|reduced) full=level 1+2+3; reduced=level 2+3')
     parser.add_argument('--measure', type=str, default='cosine', help='measure method. (default: cosine)')
     parser.add_argument('--dropout', default=0.2, type=float, help='dropout rate (default: 0.2)')
     # text-side multi-level encoding
@@ -98,7 +99,7 @@ def main():
         assert opt.visual_norm is True
 
     # checkpoint path
-    model_info = '%s_dp_%.1f_measure_%s' %  (opt.model, opt.dropout, opt.measure)
+    model_info = '%s_concate_%s_dp_%.1f_measure_%s' %  (opt.model, opt.concate, opt.dropout, opt.measure)
     # text-side multi-level encoding info
     text_encode_info = 'vocab_%s_word_dim_%s_text_rnn_size_%s_text_norm_%s' % \
             (opt.vocab, opt.word_dim, opt.text_rnn_size, opt.text_norm)
@@ -161,9 +162,16 @@ def main():
 
     # mapping layer structure
     opt.text_mapping_layers = map(int, opt.text_mapping_layers.split('-'))
-    opt.text_mapping_layers[0] = opt.bow_vocab_size + opt.text_rnn_size*2 + opt.text_kernel_num * len(opt.text_kernel_sizes) 
     opt.visual_mapping_layers = map(int, opt.visual_mapping_layers.split('-'))
-    opt.visual_mapping_layers[0] = opt.visual_feat_dim + opt.visual_rnn_size*2 + opt.visual_kernel_num * len(opt.visual_kernel_sizes)
+    if opt.concate == 'full':
+        opt.text_mapping_layers[0] = opt.bow_vocab_size + opt.text_rnn_size*2 + opt.text_kernel_num * len(opt.text_kernel_sizes) 
+        opt.visual_mapping_layers[0] = opt.visual_feat_dim + opt.visual_rnn_size*2 + opt.visual_kernel_num * len(opt.visual_kernel_sizes)
+    elif opt.concate == 'reduced':
+        opt.text_mapping_layers[0] = opt.text_rnn_size*2 + opt.text_kernel_num * len(opt.text_kernel_sizes) 
+        opt.visual_mapping_layers[0] = opt.visual_rnn_size*2 + opt.visual_kernel_num * len(opt.visual_kernel_sizes)
+    else:
+        raise NotImplementedError('Model %s not implemented'%opt.model)
+
 
     # set data loader
     video2frames = {x: read_dict(os.path.join(rootpath, collections[x], 'FeatureData', opt.visual_feature, 'video2frames.txt'))

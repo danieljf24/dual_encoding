@@ -23,7 +23,7 @@ deactivate
 ```
 
 #### Required Data
-Run `do_get_dataset.sh` or the following script to download and extract MSR-VTT(1.9G) dataset and a pre-trained word2vec(3.0G).
+Run `do_get_dataset.sh` or the following script to download and extract [MSR-VTT(1.9G)](http://lixirong.net/data/cvpr2019/msrvtt10k-text-and-resnet-152-img1k.tar.gz) dataset and a pre-trained [word2vec(3.0G)](http://lixirong.net/data/w2vv-tmm2018/word2vec.tar.gz).
 The extracted data is placed in `$HOME/VisualSearch/`.
 ```shell
 ROOTPATH=$HOME/VisualSearch
@@ -43,7 +43,7 @@ tar zxf word2vec.tar.gz
 Run the following script to train and evaluate `Dual Encoding` network on MSR-VTT.
 ```shell
 source ~/ws_dual/bin/activate
-./do_all.sh msrvtt10ktrain msrvtt10kval msrvtt10ktest
+./do_all.sh msrvtt10ktrain msrvtt10kval msrvtt10ktest full
 deactive
 ```
 Running the script will do the following things:
@@ -51,9 +51,17 @@ Running the script will do the following things:
 2. Train `Dual Encoding` network and select a checkpoint that performs best on the validation set as the final model. Notice that we only save the best-performing checkpoint on the validation set to save disk space.
 3. Evaluate the final model on the test set.
 
+If the training data is limited, we suggest dual encoding using Level 2 and Level 3 features, which has less parameters to tune but give comparable performance.
+The script is as follows:
+```shell
+source ~/ws_dual/bin/activate
+./do_all.sh msrvtt10ktrain msrvtt10kval msrvtt10ktest reduced
+deactive
+```
+
 
 ## Expected Performance
-Run the following script to evaluate our trained [model](http://lixirong.net/data/cvpr2019/model_best.pth.tar)  on MSR-VTT.
+Run the following script to evaluate our trained [model(302M)](http://lixirong.net/data/cvpr2019/model_best.pth.tar)  on MSR-VTT.
 ```shell
 source ~/ws_dual/bin/activate
 MODELDIR=$HOME/VisualSearch/msrvtt10ktrain/cvpr_2019
