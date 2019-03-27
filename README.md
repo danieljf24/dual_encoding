@@ -18,7 +18,7 @@ virtualenv --system-site-packages -p python2.7 ~/ws_dual
 source ~/ws_dual/bin/activate
 git clone https://github.com/danieljf24/dual_encoding.git
 cd ~/dual_encoding
-pip install -r util/requirements.txt
+pip install -r requirements.txt
 deactivate
 ```
 
@@ -51,14 +51,6 @@ Running the script will do the following things:
 2. Train `Dual Encoding` network and select a checkpoint that performs best on the validation set as the final model. Notice that we only save the best-performing checkpoint on the validation set to save disk space.
 3. Evaluate the final model on the test set.
 
-If the training data is limited, we suggest dual encoding using Level 2 and Level 3 features, which has less parameters to tune but give comparable performance.
-The script is as follows:
-```shell
-source ~/ws_dual/bin/activate
-./do_all.sh msrvtt10ktrain msrvtt10kval msrvtt10ktest reduced
-deactive
-```
-
 
 ## Expected Performance
 Run the following script to evaluate our trained [model(302M)](http://lixirong.net/data/cvpr2019/model_best.pth.tar)  on MSR-VTT.
@@ -81,7 +73,7 @@ The expected performance of Dual Encoding on MSR-VTT is as follows. Notice that 
 
 
 
-## How to train Dual Encoding on other datasets?
+## How to run Dual Encoding on another datasets?
 
 Store the training, validation and test subset into three folders in the following structure respectively.
 ```shell
@@ -109,14 +101,29 @@ video_id_n#1 sentence_k
 ...
 ```
 
-When the data is ready, use the following script to train and evaluate Dual Encoding on your own dataset.
+You can run the following script to check whether the data is ready:
 ```shell
 source ~/ws_dual/bin/activate
-./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} --img_feature=${feature_name} --n_caption=${caption_num}
+./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} ${rootpath} ${feature_name} ${caption_num} full
 deactive
 ```
-where `train_set_name`, `val_set_name` and `test_set_name` indicate the name of training, validation and test set, respectively. Besides, `feature_name` is the visual feature name and `caption_num` denotes the number of captions for each image. For the MSRVTT dataset, the value of `caption_num` is 20. 
+where `train_set_name`, `val_set_name` and `test_set_name` indicate the name of training, validation and test set, respectively, ${rootpath} denotes the path where datasets are saved and `feature_name` is the video frame feature name.
 
+
+If you pass the format check, use the following script to train and evaluate Dual Encoding on your own dataset.
+```shell
+source ~/ws_dual/bin/activate
+./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} ${rootpath} ${feature_name} ${caption_num} full
+deactive
+```
+where `caption_num` denotes the number of captions for each video. For the MSRVTT dataset, the value of `caption_num` is 20. 
+
+If training data of your task is relatively limited, we suggest dual encoding with level 2 and 3. Compared to the full edition, this version gives nearly comparable performance on MSR-VTT, but with less trainable parameters.
+```shell
+source ~/ws_dual/bin/activate
+./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} ${rootpath} ${feature_name} ${caption_num} reduced
+deactive
+```
 
 ## References
 If you find the package useful, please consider citing our CVPR'19 paper:
