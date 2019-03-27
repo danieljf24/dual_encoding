@@ -103,17 +103,15 @@ video_id_n#1 sentence_k
 
 You can run the following script to check whether the data is ready:
 ```shell
-source ~/ws_dual/bin/activate
-./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} ${rootpath} ${feature_name} ${caption_num} full
-deactive
+./do_format_check.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name}
 ```
-where `train_set_name`, `val_set_name` and `test_set_name` indicate the name of training, validation and test set, respectively, ${rootpath} denotes the path where datasets are saved and `feature_name` is the video frame feature name.
+where `train_set`, `val_set` and `test_set` indicate the name of training, validation and test set, respectively, ${rootpath} denotes the path where datasets are saved and `feature_name` is the video frame feature name.
 
 
 If you pass the format check, use the following script to train and evaluate Dual Encoding on your own dataset.
 ```shell
 source ~/ws_dual/bin/activate
-./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} ${rootpath} ${feature_name} ${caption_num} full
+./do_all_own_data.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name} ${caption_num} full
 deactive
 ```
 where `caption_num` denotes the number of captions for each video. For the MSRVTT dataset, the value of `caption_num` is 20. 
@@ -121,7 +119,7 @@ where `caption_num` denotes the number of captions for each video. For the MSRVT
 If training data of your task is relatively limited, we suggest dual encoding with level 2 and 3. Compared to the full edition, this version gives nearly comparable performance on MSR-VTT, but with less trainable parameters.
 ```shell
 source ~/ws_dual/bin/activate
-./do_all_own_data.sh ${train_set_name} ${val_set_name} ${test_set_name} ${rootpath} ${feature_name} ${caption_num} reduced
+./do_all_own_data.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name} ${caption_num} reduced
 deactive
 ```
 
