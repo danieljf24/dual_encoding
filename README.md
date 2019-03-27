@@ -108,7 +108,7 @@ You can run the following script to check whether the data is ready:
 where `train_set`, `val_set` and `test_set` indicate the name of training, validation and test set, respectively, ${rootpath} denotes the path where datasets are saved and `feature_name` is the video frame feature name.
 
 
-If you pass the format check, use the following script to train and evaluate Dual Encoding on your own dataset.
+If you pass the format check, use the following script to train and evaluate Dual Encoding on your own dataset:
 ```shell
 source ~/ws_dual/bin/activate
 ./do_all_own_data.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name} ${caption_num} full
