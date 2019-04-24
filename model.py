@@ -300,7 +300,7 @@ class BaseModel(object):
         if torch.__version__ == '0.3.1':
             loss_value = loss.data[0]
         else:
-            loss.item()
+            loss_value = loss.item()
 
         # compute gradient and do SGD step
         loss.backward()
