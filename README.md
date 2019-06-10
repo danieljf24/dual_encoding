@@ -38,6 +38,7 @@ wget http://lixirong.net/data/w2vv-tmm2018/word2vec.tar.gz
 tar zxf word2vec.tar.gz
 ```
 
+TRECVID experiment data can be downloaded from [here](https://github.com/li-xirong/avs)
 
 ## Getting started
 Run the following script to train and evaluate `Dual Encoding` network on MSR-VTT.
