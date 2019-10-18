@@ -53,6 +53,53 @@ def collate_frame_gru_fn(data):
     return video_data, text_data, idxs, cap_ids, video_ids
 
 
+def collate_frame(data):
+
+    videos, idxs, video_ids = zip(*data)
+
+    # Merge videos (convert tuple of 1D tensor to 4D tensor)
+    video_lengths = [min(VIDEO_MAX_LEN,len(frame)) for frame in videos]
+    frame_vec_len = len(videos[0][0])
+    vidoes = torch.zeros(len(videos), max(video_lengths), frame_vec_len)
+    videos_origin = torch.zeros(len(videos), frame_vec_len)
+    vidoes_mask = torch.zeros(len(videos), max(video_lengths))
+    for i, frames in enumerate(videos):
+            end = video_lengths[i]
+            vidoes[i, :end, :] = frames[:end,:]
+            videos_origin[i,:] = torch.mean(frames,0)
+            vidoes_mask[i,:end] = 1.0
+
+    video_data = (vidoes, videos_origin, video_lengths, vidoes_mask)
+
+    return video_data, idxs, video_ids
+
+
+def collate_text(data):
+    if data[0][0] is not None:
+        data.sort(key=lambda x: len(x[0]), reverse=True)
+    captions, cap_bows, idxs, cap_ids = zip(*data)
+
+    if captions[0] is not None:
+        # Merge captions (convert tuple of 1D tensor to 2D tensor)
+        lengths = [len(cap) for cap in captions]
+        target = torch.zeros(len(captions), max(lengths)).long()
+        words_mask = torch.zeros(len(captions), max(lengths))
+        for i, cap in enumerate(captions):
+            end = lengths[i]
+            target[i, :end] = cap[:end]
+            words_mask[i, :end] = 1.0
+    else:
+        target = None
+        lengths = None
+        words_mask = None
+
+
+    cap_bows = torch.stack(cap_bows, 0) if cap_bows[0] is not None else None
+
+    text_data = (target, cap_bows, lengths, words_mask)
+
+    return text_data, idxs, cap_ids
+
 
 class Dataset4DualEncoding(data.Dataset):
     """
@@ -117,6 +164,76 @@ class Dataset4DualEncoding(data.Dataset):
         return self.length
      
 
+class VisDataSet4DualEncoding(data.Dataset):
+    """
+    Load video frame features by pre-trained CNN model.
+    """
+    def __init__(self, visual_feat, video2frames=None):
+        self.visual_feat = visual_feat
+        self.video2frames = video2frames
+
+        self.video_ids = video2frames.keys()
+        self.length = len(self.video_ids)
+
+    def __getitem__(self, index):
+        video_id = self.video_ids[index]
+
+        frame_list = self.video2frames[video_id]
+        frame_vecs = []
+        for frame_id in frame_list:
+            frame_vecs.append(self.visual_feat.read_one(frame_id))
+        frames_tensor = torch.Tensor(frame_vecs)
+
+        return frames_tensor, index, video_id
+
+    def __len__(self):
+        return self.length
+
+
+class TxtDataSet4DualEncoding(data.Dataset):
+    """
+    Load captions
+    """
+    def __init__(self, cap_file, bow2vec, vocab):
+        # Captions
+        self.captions = {}
+        self.cap_ids = []
+        with open(cap_file, 'r') as cap_reader:
+            for line in cap_reader.readlines():
+                cap_id, caption = line.strip().split(' ', 1)
+                self.captions[cap_id] = caption
+                self.cap_ids.append(cap_id)
+        self.bow2vec = bow2vec
+        self.vocab = vocab
+        self.length = len(self.cap_ids)
+
+    def __getitem__(self, index):
+        cap_id = self.cap_ids[index]
+
+        caption = self.captions[cap_id]
+        if self.bow2vec is not None:
+            cap_bow = self.bow2vec.mapping(caption)
+            if cap_bow is None:
+                cap_bow = torch.zeros(self.bow2vec.ndims)
+            else:
+                cap_bow = torch.Tensor(cap_bow)
+        else:
+            cap_bow = None
+
+        if self.vocab is not None:
+            tokens = clean_str(caption)
+            caption = []
+            caption.append(self.vocab('<start>'))
+            caption.extend([self.vocab(token) for token in tokens])
+            caption.append(self.vocab('<end>'))
+            cap_tensor = torch.Tensor(caption)
+        else:
+            cap_tensor = None
+
+        return cap_tensor, cap_bow, index, cap_id
+
+    def __len__(self):
+        return self.length
 
 def get_data_loaders(cap_files, visual_feats, vocab, bow2vec, batch_size=100, num_workers=2, n_caption=2, video2frames=None):
     """
@@ -156,6 +273,30 @@ def get_test_data_loaders(cap_files, visual_feats, vocab, bow2vec, batch_size=10
                                     collate_fn=collate_frame_gru_fn)
                         for x in cap_files }
     return data_loaders
+
+
+def get_vis_data_loader(vis_feat, batch_size=100, num_workers=2, video2frames=None):
+    dset = VisDataSet4DualEncoding(vis_feat, video2frames)
+
+    data_loader = torch.utils.data.DataLoader(dataset=dset,
+                                              batch_size=batch_size,
+                                              shuffle=False,
+                                              pin_memory=True,
+                                              num_workers=num_workers,
+                                              collate_fn=collate_frame)
+    return data_loader
+
+
+def get_txt_data_loader(cap_file, vocab, bow2vec, batch_size=100, num_workers=2):
+    dset = TxtDataSet4DualEncoding(cap_file, bow2vec, vocab)
+
+    data_loader = torch.utils.data.DataLoader(dataset=dset,
+                                              batch_size=batch_size,
+                                              shuffle=False,
+                                              pin_memory=True,
+                                              num_workers=num_workers,
+                                              collate_fn=collate_text)
+    return data_loader
 
 
 

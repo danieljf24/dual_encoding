@@ -124,6 +124,15 @@ source ~/ws_dual/bin/activate
 deactive
 ```
 
+### Dual Encoding on Ad-hoc Video Search (AVS)
+
+```shell
+source ~/ws_dual/bin/activate
+./do_all_avs.sh 
+deactive
+```
+
+
 ## References
 If you find the package useful, please consider citing our CVPR'19 paper:
 ```

@@ -262,12 +262,16 @@ def main():
         fout.write('best performance on validation: ' + str(best_rsum))
 
     # generate evaluation shell script
-    templete = ''.join(open( 'util/TEMPLATE_do_test.sh').readlines())
-    striptStr = templete.replace('@@@rootpath@@@', rootpath)
+    if testCollection == 'iacc.3':
+        templete = ''.join(open( 'util/TEMPLATE_do_predict.sh').readlines())
+        striptStr = templete.replace('@@@query_sets@@@', 'tv16.avs.txt,tv17.avs.txt,tv18.avs.txt')
+    else:
+        templete = ''.join(open( 'util/TEMPLATE_do_test.sh').readlines())
+        striptStr = templete.replace('@@@n_caption@@@', str(opt.n_caption))
+    striptStr = striptStr.replace('@@@rootpath@@@', rootpath)
     striptStr = striptStr.replace('@@@testCollection@@@', testCollection)
     striptStr = striptStr.replace('@@@logger_name@@@', opt.logger_name)
     striptStr = striptStr.replace('@@@overwrite@@@', str(opt.overwrite))
-    striptStr = striptStr.replace('@@@n_caption@@@', str(opt.n_caption))
 
     # perform evaluation on test set
     runfile = 'do_test_%s_%s.sh' % (opt.model, testCollection)

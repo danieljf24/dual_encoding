@@ -389,6 +389,46 @@ class Dual_Encoding(BaseModel):
         cap_emb = self.text_encoding(text_data)
         return vid_emb, cap_emb
 
+    def embed_vis(self, vis_data, volatile=True):
+        # video data
+        frames, mean_origin, video_lengths, vidoes_mask = vis_data
+        frames = Variable(frames, volatile=volatile)
+        if torch.cuda.is_available():
+            frames = frames.cuda()
+
+        mean_origin = Variable(mean_origin, volatile=volatile)
+        if torch.cuda.is_available():
+            mean_origin = mean_origin.cuda()
+
+        vidoes_mask = Variable(vidoes_mask, volatile=volatile)
+        if torch.cuda.is_available():
+            vidoes_mask = vidoes_mask.cuda()
+        vis_data = (frames, mean_origin, video_lengths, vidoes_mask)
+
+        return self.vid_encoding(vis_data)
+
+
+    def embed_txt(self, txt_data, volatile=True):
+        # text data
+        captions, cap_bows, lengths, cap_masks = txt_data
+        if captions is not None:
+            captions = Variable(captions, volatile=volatile)
+            if torch.cuda.is_available():
+                captions = captions.cuda()
+
+        if cap_bows is not None:
+            cap_bows = Variable(cap_bows, volatile=volatile)
+            if torch.cuda.is_available():
+                cap_bows = cap_bows.cuda()
+
+        if cap_masks is not None:
+            cap_masks = Variable(cap_masks, volatile=volatile)
+            if torch.cuda.is_available():
+                cap_masks = cap_masks.cuda()
+        txt_data = (captions, cap_bows, lengths, cap_masks)
+
+        return self.text_encoding(txt_data)
+
 
 
 NAME_TO_MODELS = {'dual_encoding': Dual_Encoding}
