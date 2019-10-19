@@ -73,6 +73,63 @@ The expected performance of Dual Encoding on MSR-VTT is as follows. Notice that 
 
 
 
+## Dual Encoding on Ad-hoc Video Search (AVS)
+
+### Data
+
+The following three datasets are used for training, validation and testing: tgif-msrvtt10k, tv2016train and iacc.3. For more information about these datasets, please refer to https://github.com/li-xirong/avs.
+
+Run the following scripts to download and extract these datasets. The extracted data is placed in `$HOME/VisualSearch/`.
+
+#### Sentence data
+* Sentences: [tgif-msrvtt10k](http://lixirong.net/data/mm2019/tgif-msrvtt10k-sent.tar.gz), [tv2016train](http://lixirong.net/data/mm2019/tv2016train-sent.tar.gz)
+* TRECVID 2016 / 2017 / 2018 AVS topics and ground truth:  [iacc.3](http://lixirong.net/data/mm2019/iacc.3-avs-topics.tar.gz)
+
+#### Frame-level feature data
+* 2048-dim ResNeXt-101: [tgif](http://39.104.114.128/avs/tgif_ResNext-101.tar.gz)(7G), [msrvtt10k](http://39.104.114.128/avs/msrvtt10k_ResNext-101.tar.gz)(2G), [tv2016train](http://39.104.114.128/avs/tv2016train_ResNext-101.tar.gz)(42M), [iacc.3](http://39.104.114.128/avs/iacc.3_ResNext-101.tar.gz)(27G)
+
+```shell
+ROOTPATH=$HOME/VisualSearch
+cd $ROOTPATH
+
+# download and extract dataset
+wget http://39.104.114.128/avs/tgif_ResNext-101.tar.gz
+tar zxf tgif_ResNext-101.tar.gz
+
+wget http://39.104.114.128/avs/msrvtt10k_ResNext-101.tar.gz
+tar zvf msrvtt10k_ResNext-101.tar
+
+wget http://39.104.114.128/avs/tv2016train_ResNext-101.tar.gz
+tar zvf tv2016train_ResNext-101.tar.gz
+
+wget http://39.104.114.128/avs/iacc.3_ResNext-101.tar.gz
+tar zvf iacc.3_ResNext-101.tar.gz
+
+# combine feature of tgif and msrvtt10k
+./do_combine_features.sh tgif msrvtt10k
+
+```
+
+### Train Dual Encoding model from scratch
+
+```shell
+source ~/ws_dual/bin/activate
+
+trainCollection=tgif-msrvtt10k
+visual_feature=pyresnext-101_rbps13k,flatten0_output,os
+
+# Generate a vocabulary on the training set
+./do_get_vocab.sh $trainCollection
+
+# Generate video frame info
+#./do_get_frameInfo.sh $trainCollection $visual_feature
+
+
+# training and testing
+./do_all_avs.sh 
+
+deactive
+```
 
 ## How to run Dual Encoding on another datasets?
 
@@ -121,14 +178,6 @@ If training data of your task is relatively limited, we suggest dual encoding wi
 ```shell
 source ~/ws_dual/bin/activate
 ./do_all_own_data.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name} ${caption_num} reduced
-deactive
-```
-
-### Dual Encoding on Ad-hoc Video Search (AVS)
-
-```shell
-source ~/ws_dual/bin/activate
-./do_all_avs.sh 
 deactive
 ```
 
