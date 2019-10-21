@@ -106,7 +106,7 @@ wget http://39.104.114.128/avs/iacc.3_ResNext-101.tar.gz
 tar zvf iacc.3_ResNext-101.tar.gz
 
 # combine feature of tgif and msrvtt10k
-./do_combine_features.sh tgif msrvtt10k
+./do_combine_features.sh
 
 ```
 
