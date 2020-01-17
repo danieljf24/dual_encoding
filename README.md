@@ -94,16 +94,16 @@ cd $ROOTPATH
 
 # download and extract dataset
 wget http://39.104.114.128/avs/tgif_ResNext-101.tar.gz
-tar zxf tgif_ResNext-101.tar.gz
+tar zxvf tgif_ResNext-101.tar.gz
 
 wget http://39.104.114.128/avs/msrvtt10k_ResNext-101.tar.gz
-tar zvf msrvtt10k_ResNext-101.tar
+tar zxvf msrvtt10k_ResNext-101.tar
 
 wget http://39.104.114.128/avs/tv2016train_ResNext-101.tar.gz
-tar zvf tv2016train_ResNext-101.tar.gz
+tar zxvf tv2016train_ResNext-101.tar.gz
 
 wget http://39.104.114.128/avs/iacc.3_ResNext-101.tar.gz
-tar zvf iacc.3_ResNext-101.tar.gz
+tar zxvf iacc.3_ResNext-101.tar.gz
 
 # combine feature of tgif and msrvtt10k
 ./do_combine_features.sh
@@ -122,7 +122,7 @@ visual_feature=pyresnext-101_rbps13k,flatten0_output,os
 ./do_get_vocab.sh $trainCollection
 
 # Generate video frame info
-#./do_get_frameInfo.sh $trainCollection $visual_feature
+./do_get_frameInfo.sh $trainCollection $visual_feature
 
 
 # training and testing
