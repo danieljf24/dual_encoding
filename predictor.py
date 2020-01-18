@@ -98,22 +98,22 @@ def main():
     trainCollection = options.trainCollection
     valCollection = options.valCollection
 
-    #visual_feat_file = BigFile(os.path.join(rootpath, testCollection, 'FeatureData', options.visual_feature))
-    #assert options.visual_feat_dim == visual_feat_file.ndims
-    #video2frame = read_dict(os.path.join(rootpath, testCollection, 'FeatureData', options.visual_feature, 'video2frames.txt'))
-    #visual_loader = data.get_vis_data_loader(visual_feat_file, opt.batch_size, opt.workers, video2frame)
-    #vis_embs = None
+    visual_feat_file = BigFile(os.path.join(rootpath, testCollection, 'FeatureData', options.visual_feature))
+    assert options.visual_feat_dim == visual_feat_file.ndims
+    video2frame = read_dict(os.path.join(rootpath, testCollection, 'FeatureData', options.visual_feature, 'video2frames.txt'))
+    visual_loader = data.get_vis_data_loader(visual_feat_file, opt.batch_size, opt.workers, video2frame)
+    vis_embs = None
 
-    ## set bow vocabulary and encoding
-    #bow_vocab_file = os.path.join(rootpath, options.trainCollection, 'TextData', 'vocabulary', 'bow', options.vocab+'.pkl')
-    #bow_vocab = pickle.load(open(bow_vocab_file, 'rb'))
-    #bow2vec = get_text_encoder('bow')(bow_vocab)
-    #options.bow_vocab_size = len(bow_vocab)
+    # set bow vocabulary and encoding
+    bow_vocab_file = os.path.join(rootpath, options.trainCollection, 'TextData', 'vocabulary', 'bow', options.vocab+'.pkl')
+    bow_vocab = pickle.load(open(bow_vocab_file, 'rb'))
+    bow2vec = get_text_encoder('bow')(bow_vocab)
+    options.bow_vocab_size = len(bow_vocab)
 
-    ## set rnn vocabulary 
-    #rnn_vocab_file = os.path.join(rootpath, options.trainCollection, 'TextData', 'vocabulary', 'rnn', options.vocab+'.pkl')
-    #rnn_vocab = pickle.load(open(rnn_vocab_file, 'rb'))
-    #options.vocab_size = len(rnn_vocab)
+    # set rnn vocabulary 
+    rnn_vocab_file = os.path.join(rootpath, options.trainCollection, 'TextData', 'vocabulary', 'rnn', options.vocab+'.pkl')
+    rnn_vocab = pickle.load(open(rnn_vocab_file, 'rb'))
+    options.vocab_size = len(rnn_vocab)
 
     output_dir = resume.replace(trainCollection, testCollection)
     for query_set in opt.query_sets.strip().split(','):
@@ -132,27 +132,27 @@ def main():
         query_file = os.path.join(rootpath, testCollection, 'TextData', query_set)
 
         # set data loader
-        #query_loader = data.get_txt_data_loader(query_file, rnn_vocab, bow2vec, opt.batch_size, opt.workers)
+        query_loader = data.get_txt_data_loader(query_file, rnn_vocab, bow2vec, opt.batch_size, opt.workers)
 
-        #if vis_embs is None:
-        #    start = time.time()
-        #    vis_embs, vis_ids = encode_data(model.embed_vis, visual_loader)
-        #    print("encode image time: %.3f s" % (time.time()-start))
+        if vis_embs is None:
+            start = time.time()
+            vis_embs, vis_ids = encode_data(model.embed_vis, visual_loader)
+            print("encode image time: %.3f s" % (time.time()-start))
 
-        #start = time.time()
-        #query_embs, query_ids = encode_data(model.embed_txt, query_loader)
-        #print("encode text time: %.3f s" % (time.time()-start))
+        start = time.time()
+        query_embs, query_ids = encode_data(model.embed_txt, query_loader)
+        print("encode text time: %.3f s" % (time.time()-start))
 
-        #start = time.time()
-        #t2i_matrix = query_embs.dot(vis_embs.T)
-        #inds = np.argsort(t2i_matrix, axis=1)
-        #print("compute similarity time: %.3f s" % (time.time()-start))
+        start = time.time()
+        t2i_matrix = query_embs.dot(vis_embs.T)
+        inds = np.argsort(t2i_matrix, axis=1)
+        print("compute similarity time: %.3f s" % (time.time()-start))
 
-        #with open(pred_result_file, 'w') as fout:
-        #    for index in range(inds.shape[0]):
-        #        ind = inds[index][::-1]
-        #        fout.write(query_ids[index]+' '+' '.join([vis_ids[i]+' %s'%t2i_matrix[index][i]
-        #            for i in ind])+'\n')
+        with open(pred_result_file, 'w') as fout:
+            for index in range(inds.shape[0]):
+                ind = inds[index][::-1]
+                fout.write(query_ids[index]+' '+' '.join([vis_ids[i]+' %s'%t2i_matrix[index][i]
+                    for i in ind])+'\n')
 
         if testCollection == 'iacc.3':
             templete = ''.join(open( 'tv-avs-eval/TEMPLATE_do_eval.sh').readlines())
