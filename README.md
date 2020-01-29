@@ -37,7 +37,7 @@ tar zxf msrvtt10k-text-and-resnet-152-img1k.tar.gz
 wget http://lixirong.net/data/w2vv-tmm2018/word2vec.tar.gz
 tar zxf word2vec.tar.gz
 ```
-The data can also be downloaded from (Google Drive)[https://drive.google.com/drive/folders/1GoomucXoAmhd3Jhngdnea7t0GOnJoGth?usp=sharing] and (Baidu Pan)[https://pan.baidu.com/s/1Z5wgpZQPL2YZakGJsD1Khg].
+The data can also be downloaded from [Google Drive](https://drive.google.com/drive/folders/1GoomucXoAmhd3Jhngdnea7t0GOnJoGth?usp=sharing) and [Baidu Pan](https://pan.baidu.com/s/1Z5wgpZQPL2YZakGJsD1Khg).
 
 ## Getting started
 Run the following script to train and evaluate `Dual Encoding` network on MSR-VTT.
