@@ -123,8 +123,8 @@ class Dataset4DualEncoding(data.Dataset):
         self.bow2vec = bow2vec
         self.vocab = vocab
         self.length = len(self.cap_ids)
-        if n_caption is not None:
-            assert len(self.video_ids) * n_caption == self.length, "%d != %d" % (len(self.video_ids) * n_caption, self.length)
+        # if n_caption is not None:
+        #     assert len(self.video_ids) * n_caption == self.length, "%d != %d" % (len(self.video_ids) * n_caption, self.length)
 
     def __getitem__(self, index):
         cap_id = self.cap_ids[index]

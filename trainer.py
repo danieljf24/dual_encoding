@@ -335,14 +335,20 @@ def validate(opt, val_loader, model, measure='cosine'):
     if opt.val_metric == "recall":
 
         # video retrieval
-        (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=opt.n_caption)
+        if opt.testCollection.startswith('msvd'):
+            (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_various(c2i_all_errors, caption_ids, video_ids)
+        else:
+            (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=opt.n_caption)
         print(" * Text to video:")
         print(" * r_1_5_10: {}".format([round(r1i, 3), round(r5i, 3), round(r10i, 3)]))
         print(" * medr, meanr: {}".format([round(medri, 3), round(meanri, 3)]))
         print(" * "+'-'*10)
 
         # caption retrieval
-        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=opt.n_caption)
+        if opt.testCollection.startswith('msvd'):
+            (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_various(c2i_all_errors, caption_ids, video_ids)
+        else:
+            (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=opt.n_caption)
         print(" * Video to text:")
         print(" * r_1_5_10: {}".format([round(r1, 3), round(r5, 3), round(r10, 3)]))
         print(" * medr, meanr: {}".format([round(medr, 3), round(meanr, 3)]))

@@ -105,18 +105,26 @@ def main():
     # remove duplicate videos
     idx = range(0, video_embs.shape[0], n_caption)
     video_embs = video_embs[idx,:]
+    video_ids = video_ids[::opt.n_caption]
 
     c2i_all_errors = evaluation.cal_error(video_embs, cap_embs, options.measure)
     torch.save({'errors': c2i_all_errors, 'videos': video_ids, 'captions': caption_ids}, pred_error_matrix_file)    
     print("write into: %s" % pred_error_matrix_file)
 
     # caption retrieval
-    (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=n_caption)
-    i2t_map_score = evaluation.i2t_map(c2i_all_errors, n_caption=n_caption)
+    if testCollection.startswith('msvd'):
+        (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_various(c2i_all_errors, caption_ids, video_ids)
+    else:
+        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=n_caption)
+        i2t_map_score = evaluation.i2t_map(c2i_all_errors, n_caption=n_caption)
 
     # video retrieval
-    (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=n_caption)
-    t2i_map_score = evaluation.t2i_map(c2i_all_errors, n_caption=n_caption)
+    if testCollection.startswith('msvd'):
+        (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_various(c2i_all_errors, caption_ids, video_ids)
+    else:
+        (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=n_caption)
+        t2i_map_score = evaluation.t2i_map(c2i_all_errors, n_caption=n_caption)
+
     print(" * Text to Video:")
     print(" * r_1_5_10, medr, meanr: {}".format([round(r1i, 1), round(r5i, 1), round(r10i, 1), round(medri, 1), round(meanri, 1)]))
     print(" * recall sum: {}".format(round(r1i+r5i+r10i, 1)))

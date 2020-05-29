@@ -244,3 +244,44 @@ def i2t_inv_rank_multi(c2i, n_caption=2):
         score = i2t_inv_rank(sub_c2i, n_caption=1)
         result.append(score)
     return result
+
+
+
+
+# the number of captions are various across videos
+def eval_various(label_matrix):
+    ranks = np.zeros(label_matrix.shape[0])
+    aps = np.zeros(label_matrix.shape[0])
+
+    for index in range(len(ranks)):
+        rank = np.where(label_matrix[index]==1)[0] + 1
+        ranks[index] = rank[0]
+
+        aps[index] = np.mean([(i+1.)/rank[i] for i in range(len(rank))])
+
+    r1, r5, r10 = [100.0*np.mean([x <= k for x in ranks]) for k in [1, 5, 10]]
+    medr = np.floor(np.median(ranks))
+    meanr = ranks.mean()
+    # mir = (1.0/ranks).mean()
+    mAP = aps.mean()
+
+    return (r1, r5, r10, medr, meanr, mAP)
+
+
+def i2t_various(c2i_all_errors, caption_ids, video_ids):
+    inds = np.argsort(-c2i_all_errors, axis=1)
+    label_matrix = np.zeros(inds.shape)
+    for index in range(inds.shape[0]):
+        ind = inds[index][::-1]
+        label_matrix[index][np.where(np.array(video_ids)[ind]==caption_ids[index].split('#')[0])[0]]=1
+    return eval_various(label_matrix)
+
+
+def t2i_various(c2i_all_errors, caption_ids, video_ids):
+    inds = np.argsort(-c2i_all_errors.T, axis=1)
+    label_matrix = np.zeros(inds.shape)
+    caption_ids = [txt_id.split('#')[0] for txt_id in caption_ids]
+    for index in range(inds.shape[0]):
+        ind = inds[index][::-1]
+        label_matrix[index][np.where(np.array(caption_ids)[ind]==video_ids[index])[0]]=1
+    return eval_various(label_matrix)

@@ -71,6 +71,22 @@ The expected performance of Dual Encoding on MSR-VTT is as follows. Notice that 
 | Video-to-Text | 12.8 | 30.3 | 42.4 | 16 | 0.065 |
 
 
+## Dual Encoding on MSVD
+
+The msvd dataset (msvd-text-and-resnet-152-img1k.tar.gz) with extracted video feature can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1GoomucXoAmhd3Jhngdnea7t0GOnJoGth?usp=sharing) and [Baidu Pan](https://pan.baidu.com/s/1Z5wgpZQPL2YZakGJsD1Khg).  
+Run the following script to train and evaluate `Dual Encoding` network on MSVD. 
+```shell
+source ~/ws_dual/bin/activate
+./do_all.sh msvdtrain msvdval msvdtest full
+deactive
+```
+
+We utilized 1,200, 100 and 670 video clips for training, validation, and test. All the sentences associated with videos are used. The performance are shown in the follows.
+|  | R@1 | R@5 | R@10 | Med r |	mAP |
+| ------------- | ------------- | ------------- | ------------- |  ------------- | ------------- |
+| Text-to-Video | 15.0 | 29.7 | 38.9 | 24 | 0.097 |
+| Video-to-Text | 11.2 | 21.6 | 31.3 | 30 | 0.065 |
+
 
 ## Dual Encoding on Ad-hoc Video Search (AVS)
 
