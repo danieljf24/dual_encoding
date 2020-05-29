@@ -81,7 +81,7 @@ source ~/ws_dual/bin/activate
 deactive
 ```
 
-We utilized 1,200, 100 and 670 video clips for training, validation, and test. All the sentences associated with videos are used. The performance are shown in the follows.
+We utilized 1,200, 100 and 670 video clips for training, validation, and test. All the sentences associated with videos are used. The performance are shown in the following.
 |  | R@1 | R@5 | R@10 | Med r |	mAP |
 | ------------- | ------------- | ------------- | ------------- |  ------------- | ------------- |
 | Text-to-Video | 15.0 | 29.7 | 38.9 | 24 | 0.097 |
