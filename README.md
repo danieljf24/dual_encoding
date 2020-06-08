@@ -84,8 +84,8 @@ deactive
 We utilized 1,200, 100 and 670 video clips for training, validation, and test. All the sentences associated with videos are used. The performance are shown in the following.
 |  | R@1 | R@5 | R@10 | Med r |	mAP |
 | ------------- | ------------- | ------------- | ------------- |  ------------- | ------------- |
-| Text-to-Video | 15.0 | 29.7 | 38.9 | 24 | 0.097 |
-| Video-to-Text | 11.2 | 21.6 | 31.3 | 30 | 0.065 |
+| Text-to-Video | 12.7 | 34.5 | 46.4 | 13 | 0.234 |
+| Video-to-Text | 16.1 | 32.1 | 41.5 | 17 | 0.112 |
 
 
 ## Dual Encoding on Ad-hoc Video Search (AVS)

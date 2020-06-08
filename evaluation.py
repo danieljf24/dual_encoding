@@ -10,6 +10,7 @@ import torch
 from torch.autograd import Variable
 from basic.metric import getScorer
 from basic.util import AverageMeter, LogCollector
+from basic.generic_utils import Progbar
 
 def l2norm(X):
     """L2-normalize columns of X
@@ -82,6 +83,38 @@ def encode_data(model, data_loader, log_step=10, logging=print, return_ids=True)
         return video_embs, cap_embs, video_ids, caption_ids
     else:
         return video_embs, cap_embs
+
+
+
+def encode_text_or_vid(encoder, data_loader, return_ids=True):
+    """Encode all videos and captions loadable by `data_loader`
+    """
+    # numpy array to keep all the embeddings
+    embeddings = None
+    ids = ['']*len(data_loader.dataset)
+    pbar = Progbar(len(data_loader.dataset))
+    for i, (datas, idxs, data_ids) in enumerate(data_loader):
+
+        # compute the embeddings
+        emb = encoder(datas)
+
+        # initialize the numpy arrays given the size of the embeddings
+        if embeddings is None:
+            embeddings = np.zeros((len(data_loader.dataset), emb.size(1)))
+
+        # preserve the embeddings by copying from gpu and converting to numpy
+        embeddings[idxs] = emb.data.cpu().numpy().copy()
+
+        for j, idx in enumerate(idxs):
+            ids[idx] = data_ids[j]
+
+        del datas
+        pbar.add(len(idxs))
+
+    if return_ids == True:
+        return embeddings, ids,
+    else:
+        return embeddings
 
 
 # recall@k, Med r, Mean r for Text-to-Video Retrieval
@@ -249,7 +282,7 @@ def i2t_inv_rank_multi(c2i, n_caption=2):
 
 
 # the number of captions are various across videos
-def eval_various(label_matrix):
+def eval_varied(label_matrix):
     ranks = np.zeros(label_matrix.shape[0])
     aps = np.zeros(label_matrix.shape[0])
 
@@ -268,20 +301,20 @@ def eval_various(label_matrix):
     return (r1, r5, r10, medr, meanr, mAP)
 
 
-def i2t_various(c2i_all_errors, caption_ids, video_ids):
+def t2i_varied(c2i_all_errors, caption_ids, video_ids):
     inds = np.argsort(-c2i_all_errors, axis=1)
     label_matrix = np.zeros(inds.shape)
     for index in range(inds.shape[0]):
         ind = inds[index][::-1]
         label_matrix[index][np.where(np.array(video_ids)[ind]==caption_ids[index].split('#')[0])[0]]=1
-    return eval_various(label_matrix)
+    return eval_varied(label_matrix)
 
 
-def t2i_various(c2i_all_errors, caption_ids, video_ids):
+def i2t_varied(c2i_all_errors, caption_ids, video_ids):
     inds = np.argsort(-c2i_all_errors.T, axis=1)
     label_matrix = np.zeros(inds.shape)
     caption_ids = [txt_id.split('#')[0] for txt_id in caption_ids]
     for index in range(inds.shape[0]):
         ind = inds[index][::-1]
         label_matrix[index][np.where(np.array(caption_ids)[ind]==video_ids[index])[0]]=1
-    return eval_various(label_matrix)
+    return eval_varied(label_matrix)

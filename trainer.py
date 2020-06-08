@@ -176,8 +176,15 @@ def main():
     # set data loader
     video2frames = {x: read_dict(os.path.join(rootpath, collections[x], 'FeatureData', opt.visual_feature, 'video2frames.txt'))
                     for x in collections }
-    data_loaders = data.get_data_loaders(
-        caption_files, visual_feats, rnn_vocab, bow2vec, opt.batch_size, opt.workers, opt.n_caption, video2frames=video2frames)
+    if testCollection.startswith('msvd'):
+        data_loaders = data.get_train_data_loaders(
+            caption_files, visual_feats, rnn_vocab, bow2vec, opt.batch_size, opt.workers, opt.n_caption, video2frames=video2frames)
+        val_video_ids_list = data.read_video_ids(caption_files['val'])
+        val_vid_data_loader = data.get_vis_data_loader(visual_feats['val'], opt.batch_size, opt.workers, video2frames['val'], video_ids=val_video_ids_list)
+        val_text_data_loader = data.get_txt_data_loader(caption_files['val'], rnn_vocab, bow2vec, opt.batch_size, opt.workers)
+    else:
+        data_loaders = data.get_data_loaders(
+            caption_files, visual_feats, rnn_vocab, bow2vec, opt.batch_size, opt.workers, opt.n_caption, video2frames=video2frames)
        
 
     # Construct the model
@@ -197,7 +204,10 @@ def main():
             model.Eiters = checkpoint['Eiters']
             print("=> loaded checkpoint '{}' (epoch {}, best_rsum {})"
                   .format(opt.resume, start_epoch, best_rsum))
-            validate(opt, data_loaders['val'], model, measure=opt.measure)
+            if testCollection.startswith('msvd'):
+                validate_split(opt, val_vid_data_loader, val_text_data_loader, model, measure=opt.measure)
+            else:
+                validate(opt, data_loaders['val'], model, measure=opt.measure)
         else:
             print("=> no checkpoint found at '{}'".format(opt.resume))
 
@@ -215,7 +225,10 @@ def main():
         train(opt, data_loaders['train'], model, epoch)
 
         # evaluate on validation set
-        rsum = validate(opt, data_loaders['val'], model, measure=opt.measure)
+        if testCollection.startswith('msvd'):
+            rsum = validate_split(opt, val_vid_data_loader, val_text_data_loader, model, measure=opt.measure)
+        else:
+            rsum = validate(opt, data_loaders['val'], model, measure=opt.measure)
 
 
         # remember best R@ sum and save checkpoint
@@ -336,7 +349,7 @@ def validate(opt, val_loader, model, measure='cosine'):
 
         # video retrieval
         if opt.testCollection.startswith('msvd'):
-            (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_various(c2i_all_errors, caption_ids, video_ids)
+            (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_varied(c2i_all_errors, caption_ids, video_ids)
         else:
             (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=opt.n_caption)
         print(" * Text to video:")
@@ -346,7 +359,7 @@ def validate(opt, val_loader, model, measure='cosine'):
 
         # caption retrieval
         if opt.testCollection.startswith('msvd'):
-            (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_various(c2i_all_errors, caption_ids, video_ids)
+            (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_varied(c2i_all_errors, caption_ids, video_ids)
         else:
             (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=opt.n_caption)
         print(" * Video to text:")
@@ -390,6 +403,75 @@ def validate(opt, val_loader, model, measure='cosine'):
     tb_logger.log_value('rsum', currscore, step=model.Eiters)
 
     return currscore
+
+
+def validate_split(opt, vid_data_loader, text_data_loader, model, measure='cosine'):
+    # compute the encoding for all the validation video and captions
+    
+    model.val_start()
+    video_embs, video_ids = evaluation.encode_text_or_vid(model.embed_vis, vid_data_loader)
+    cap_embs, caption_ids = evaluation.encode_text_or_vid(model.embed_txt, text_data_loader)
+
+    c2i_all_errors = evaluation.cal_error(video_embs, cap_embs, measure)
+    if opt.val_metric == "recall":
+
+        # video retrieval
+        if opt.testCollection.startswith('msvd'):
+            (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_varied(c2i_all_errors, caption_ids, video_ids)
+        else:
+            (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=opt.n_caption)
+        print(" * Text to video:")
+        print(" * r_1_5_10: {}".format([round(r1i, 3), round(r5i, 3), round(r10i, 3)]))
+        print(" * medr, meanr: {}".format([round(medri, 3), round(meanri, 3)]))
+        print(" * "+'-'*10)
+
+        # caption retrieval
+        if opt.testCollection.startswith('msvd'):
+            (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_varied(c2i_all_errors, caption_ids, video_ids)
+        else:
+            (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=opt.n_caption)
+        print(" * Video to text:")
+        print(" * r_1_5_10: {}".format([round(r1, 3), round(r5, 3), round(r10, 3)]))
+        print(" * medr, meanr: {}".format([round(medr, 3), round(meanr, 3)]))
+        print(" * "+'-'*10)
+
+        # record metrics in tensorboard
+        tb_logger.log_value('r1', r1, step=model.Eiters)
+        tb_logger.log_value('r5', r5, step=model.Eiters)
+        tb_logger.log_value('r10', r10, step=model.Eiters)
+        tb_logger.log_value('medr', medr, step=model.Eiters)
+        tb_logger.log_value('meanr', meanr, step=model.Eiters)
+        tb_logger.log_value('r1i', r1i, step=model.Eiters)
+        tb_logger.log_value('r5i', r5i, step=model.Eiters)
+        tb_logger.log_value('r10i', r10i, step=model.Eiters)
+        tb_logger.log_value('medri', medri, step=model.Eiters)
+        tb_logger.log_value('meanri', meanri, step=model.Eiters)
+
+
+    elif opt.val_metric == "map":
+        i2t_map_score = evaluation.i2t_map(c2i_all_errors, n_caption=opt.n_caption)
+        t2i_map_score = evaluation.t2i_map(c2i_all_errors, n_caption=opt.n_caption)
+        tb_logger.log_value('i2t_map', i2t_map_score, step=model.Eiters)
+        tb_logger.log_value('t2i_map', t2i_map_score, step=model.Eiters)
+        print('i2t_map', i2t_map_score)
+        print('t2i_map', t2i_map_score)
+
+    currscore = 0
+    if opt.val_metric == "recall":
+        if opt.direction == 'i2t' or opt.direction == 'all':
+            currscore += (r1 + r5 + r10)
+        if opt.direction == 't2i' or opt.direction == 'all':
+            currscore += (r1i + r5i + r10i)
+    elif opt.val_metric == "map":
+        if opt.direction == 'i2t' or opt.direction == 'all':
+            currscore += i2t_map_score
+        if opt.direction == 't2i' or opt.direction == 'all':
+            currscore += t2i_map_score
+
+    tb_logger.log_value('rsum', currscore, step=model.Eiters)
+
+    return currscore
+
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar', prefix='', best_epoch=None):

@@ -92,38 +92,49 @@ def main():
     rnn_vocab = pickle.load(open(rnn_vocab_file, 'rb'))
     options.vocab_size = len(rnn_vocab)
 
-    # set data loader
-    data_loader = data.get_test_data_loaders(
-        caption_files, visual_feats, rnn_vocab, bow2vec, opt.batch_size, opt.workers, opt.n_caption, video2frames=video2frames)
-
     # Construct the model
     model = get_model(options.model)(options)
     model.load_state_dict(checkpoint['model'])
     model.Eiters = checkpoint['Eiters']
-
-    video_embs, cap_embs, video_ids, caption_ids = evaluation.encode_data(model, data_loader['test'], opt.log_step, logging.info)
-    # remove duplicate videos
-    idx = range(0, video_embs.shape[0], n_caption)
-    video_embs = video_embs[idx,:]
-    video_ids = video_ids[::opt.n_caption]
+    model.val_start()
+    
+    if testCollection.startswith('msvd'):# or testCollection.startswith('msrvtt'):
+        # set data loader
+        video_ids_list = data.read_video_ids(caption_files['test'])
+        vid_data_loader = data.get_vis_data_loader(visual_feats['test'], opt.batch_size, opt.workers, video2frames['test'], video_ids=video_ids_list)
+        text_data_loader = data.get_txt_data_loader(caption_files['test'], rnn_vocab, bow2vec, opt.batch_size, opt.workers)
+        # mapping
+        video_embs, video_ids = evaluation.encode_text_or_vid(model.embed_vis, vid_data_loader)
+        cap_embs, caption_ids = evaluation.encode_text_or_vid(model.embed_txt, text_data_loader)
+    else:
+        # set data loader
+        data_loader = data.get_test_data_loaders(
+            caption_files, visual_feats, rnn_vocab, bow2vec, opt.batch_size, opt.workers, opt.n_caption, video2frames=video2frames)
+        # mapping
+        video_embs, cap_embs, video_ids, caption_ids = evaluation.encode_data(model, data_loader['test'], opt.log_step, logging.info)
+        # remove duplicate videos
+        idx = range(0, video_embs.shape[0], n_caption)
+        video_embs = video_embs[idx,:]
+        video_ids = video_ids[::opt.n_caption]
 
     c2i_all_errors = evaluation.cal_error(video_embs, cap_embs, options.measure)
     torch.save({'errors': c2i_all_errors, 'videos': video_ids, 'captions': caption_ids}, pred_error_matrix_file)    
     print("write into: %s" % pred_error_matrix_file)
 
-    # caption retrieval
-    if testCollection.startswith('msvd'):
-        (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_various(c2i_all_errors, caption_ids, video_ids)
-    else:
-        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=n_caption)
-        i2t_map_score = evaluation.i2t_map(c2i_all_errors, n_caption=n_caption)
 
-    # video retrieval
-    if testCollection.startswith('msvd'):
-        (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_various(c2i_all_errors, caption_ids, video_ids)
+    if testCollection.startswith('msvd'):# or testCollection.startswith('msrvtt'):
+        # caption retrieval
+        (r1, r5, r10, medr, meanr, i2t_map_score) = evaluation.i2t_varied(c2i_all_errors, caption_ids, video_ids)
+        # video retrieval
+        (r1i, r5i, r10i, medri, meanri, t2i_map_score) = evaluation.t2i_varied(c2i_all_errors, caption_ids, video_ids)
     else:
+        # caption retrieval
         (r1i, r5i, r10i, medri, meanri) = evaluation.t2i(c2i_all_errors, n_caption=n_caption)
         t2i_map_score = evaluation.t2i_map(c2i_all_errors, n_caption=n_caption)
+
+        # video retrieval
+        (r1, r5, r10, medr, meanr) = evaluation.i2t(c2i_all_errors, n_caption=n_caption)
+        i2t_map_score = evaluation.i2t_map(c2i_all_errors, n_caption=n_caption)
 
     print(" * Text to Video:")
     print(" * r_1_5_10, medr, meanr: {}".format([round(r1i, 1), round(r5i, 1), round(r10i, 1), round(medri, 1), round(meanri, 1)]))

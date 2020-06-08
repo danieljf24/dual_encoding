@@ -9,6 +9,18 @@ from vocab import clean_str
 VIDEO_MAX_LEN=64
 
 
+def read_video_ids(cap_file):
+    video_ids_list = []
+    with open(cap_file, 'r') as cap_reader:
+        for line in cap_reader.readlines():
+            cap_id, caption = line.strip().split(' ', 1)
+            video_id = getVideoId(cap_id)
+            if video_id not in video_ids_list:
+                video_ids_list.append(video_id)
+    return video_ids_list
+
+
+
 def collate_frame_gru_fn(data):
     """
     Build mini-batch tensors from a list of (video, caption) tuples.
@@ -168,11 +180,14 @@ class VisDataSet4DualEncoding(data.Dataset):
     """
     Load video frame features by pre-trained CNN model.
     """
-    def __init__(self, visual_feat, video2frames=None):
+    def __init__(self, visual_feat, video2frames=None, video_ids=None):
         self.visual_feat = visual_feat
         self.video2frames = video2frames
-
-        self.video_ids = video2frames.keys()
+        
+        if video_ids is None:
+            self.video_ids = video2frames.keys()
+        else:
+            self.video_ids = video_ids
         self.length = len(self.video_ids)
 
     def __getitem__(self, index):
@@ -255,6 +270,25 @@ def get_data_loaders(cap_files, visual_feats, vocab, bow2vec, batch_size=100, nu
     return data_loaders
 
 
+def get_train_data_loaders(cap_files, visual_feats, vocab, bow2vec, batch_size=100, num_workers=2, n_caption=2, video2frames=None):
+    """
+    Returns torch.utils.data.DataLoader for train and validation datasets
+    Args:
+        cap_files: caption files (dict) keys: [train, val]
+        visual_feats: image feats (dict) keys: [train, val]
+    """
+    dset = {'train': Dataset4DualEncoding(cap_files['train'], visual_feats['train'], bow2vec, vocab, video2frames=video2frames['train'])}
+
+    data_loaders = {x: torch.utils.data.DataLoader(dataset=dset[x],
+                                    batch_size=batch_size,
+                                    shuffle=(x=='train'),
+                                    pin_memory=True,
+                                    num_workers=num_workers,
+                                    collate_fn=collate_frame_gru_fn)
+                        for x in cap_files if x=='train' }
+    return data_loaders
+
+
 def get_test_data_loaders(cap_files, visual_feats, vocab, bow2vec, batch_size=100, num_workers=2, n_caption=2, video2frames = None):
     """
     Returns torch.utils.data.DataLoader for test dataset
@@ -275,8 +309,8 @@ def get_test_data_loaders(cap_files, visual_feats, vocab, bow2vec, batch_size=10
     return data_loaders
 
 
-def get_vis_data_loader(vis_feat, batch_size=100, num_workers=2, video2frames=None):
-    dset = VisDataSet4DualEncoding(vis_feat, video2frames)
+def get_vis_data_loader(vis_feat, batch_size=100, num_workers=2, video2frames=None, video_ids=None):
+    dset = VisDataSet4DualEncoding(vis_feat, video2frames, video_ids=video_ids)
 
     data_loader = torch.utils.data.DataLoader(dataset=dset,
                                               batch_size=batch_size,
