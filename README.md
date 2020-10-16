@@ -38,6 +38,7 @@ wget http://lixirong.net/data/w2vv-tmm2018/word2vec.tar.gz
 tar zxf word2vec.tar.gz
 ```
 The data can also be downloaded from [Google Drive](https://drive.google.com/drive/folders/1GoomucXoAmhd3Jhngdnea7t0GOnJoGth?usp=sharing) and [Baidu Pan](https://pan.baidu.com/s/1Z5wgpZQPL2YZakGJsD1Khg).
+Note: Code of video feature extraction is available [here](https://github.com/xuchaoxi/video-cnn-feat).
 
 ## Getting started
 Run the following script to train and evaluate `Dual Encoding` network on MSR-VTT.
