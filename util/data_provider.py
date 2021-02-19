@@ -4,7 +4,7 @@ import numpy as np
 import json as jsonmod
 
 from basic.util import getVideoId
-from vocab import clean_str
+from util.vocab import clean_str
 
 VIDEO_MAX_LEN=64
 

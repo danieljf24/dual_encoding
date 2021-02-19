@@ -68,8 +68,8 @@ The expected performance of Dual Encoding on MSR-VTT is as follows. Notice that 
 
 |  | R@1 | R@5 | R@10 | Med r |	mAP |
 | ------------- | ------------- | ------------- | ------------- |  ------------- | ------------- |
-| Text-to-Video | 7.6  | 22.4 | 31.8 | 33 | 0.155 |
-| Video-to-Text | 12.8 | 30.3 | 42.4 | 16 | 0.065 |
+| Text-to-Video | 7.9  | 22.7 | 32.3 | 33 | 0.158 |
+| Video-to-Text | 12.8 | 32.1 | 43.8 | 14 | 0.065 |
 
 
 ## Dual Encoding on MSVD

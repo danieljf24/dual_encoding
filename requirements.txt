@@ -1,6 +1,5 @@
-numpy==1.14.3
-scikit-learn==0.19.1
-scipy==1.1.0
+numpy==1.19.2
+torch==1.5.1
+torchvision==0.6.1
+scipy==1.5.4
 tensorboard-logger==0.1.0
-torch==0.3.1
-torchvision==0.2.1

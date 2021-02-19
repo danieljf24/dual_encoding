@@ -125,14 +125,14 @@ def t2i(c2i, vis_details=False, n_caption=5):
     vis_details: if true, return a dictionary for ROC visualization purposes
     """
     # print("errors matrix shape: ", c2i.shape)
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
     ranks = np.zeros(c2i.shape[0])
 
     for i in range(len(ranks)):
         d_i = c2i[i]
         inds = np.argsort(d_i)
 
-        rank = np.where(inds == i/n_caption)[0][0]
+        rank = np.where(inds == i//n_caption)[0][0]
         ranks[i] = rank
 
     # Compute metrics
@@ -154,14 +154,14 @@ def i2t(c2i, n_caption=5):
     """
     #remove duplicate videos
     # print("errors matrix shape: ", c2i.shape)
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
     ranks = np.zeros(c2i.shape[1])
 
     for i in range(len(ranks)):
         d_i = c2i[:, i]
         inds = np.argsort(d_i)
 
-        rank = np.where(inds/n_caption == i)[0][0]
+        rank = np.where(inds//n_caption == i)[0][0]
         ranks[i] = rank
 
     # Compute metrics
@@ -180,14 +180,14 @@ def t2i_map(c2i, n_caption=5):
     c2i: (5N, N) matrix of caption to video errors
     """
     # print("errors matrix shape: ", c2i.shape)
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
 
     scorer = getScorer('AP')
     perf_list = []
     for i in range(c2i.shape[0]):
         d_i = c2i[i, :]
         labels = [0]*len(d_i)
-        labels[i/n_caption] = 1
+        labels[i//n_caption] = 1
 
         sorted_labels = [labels[x] for x in np.argsort(d_i)]
         current_score = scorer.score(sorted_labels)
@@ -203,7 +203,7 @@ def i2t_map(c2i, n_caption=5):
     c2i: (5N, N) matrix of caption to video errors
     """
     # print("errors matrix shape: ", c2i.shape)
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
 
     scorer = getScorer('AP')
     perf_list = []
@@ -225,7 +225,7 @@ def t2i_inv_rank(c2i, n_caption=1):
     c2i: (5N, N) matrix of caption to video errors
     n_caption: number of captions of each image/video
     """
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
     inv_ranks = np.zeros(c2i.shape[0])
 
     for i in range(len(inv_ranks)):
@@ -245,14 +245,14 @@ def i2t_inv_rank(c2i, n_caption=1):
     c2i: (5N, N) matrix of caption to video errors
     n_caption: number of captions of each image/video
     """
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
     inv_ranks = np.zeros(c2i.shape[1])
 
     for i in range(len(inv_ranks)):
         d_i = c2i[:, i]
         inds = np.argsort(d_i)
 
-        rank = np.where(inds/n_caption == i)[0]
+        rank = np.where(inds//n_caption == i)[0]
         inv_ranks[i] = sum(1.0 / (rank +1 ))
 
     return np.mean(inv_ranks)
@@ -267,7 +267,7 @@ def i2t_inv_rank_multi(c2i, n_caption=2):
     n_caption: number of captions of each image/video
     """
     # print("errors matrix shape: ", c2i.shape)
-    assert c2i.shape[0] / c2i.shape[1] == n_caption, c2i.shape
+    assert c2i.shape[0] // c2i.shape[1] == n_caption, c2i.shape
     inv_ranks = np.zeros(c2i.shape[1])
 
     result = []

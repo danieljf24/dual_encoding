@@ -49,7 +49,7 @@ class LogCollector(object):
         """Concatenate the meters in one log line
         """
         s = ''
-        for i, (k, v) in enumerate(self.meters.iteritems()):
+        for i, (k, v) in enumerate(self.meters.items()):
             if i > 0:
                 s += '  '
             s += k + ' ' + str(v)
@@ -58,7 +58,7 @@ class LogCollector(object):
     def tb_log(self, tb_logger, prefix='', step=None):
         """Log using tensorboard
         """
-        for k, v in self.meters.iteritems():
+        for k, v in self.meters.items():
             tb_logger.log_value(prefix + k, v.val, step=step)
 
 def read_dict(filepath):

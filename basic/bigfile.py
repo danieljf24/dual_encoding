@@ -6,7 +6,9 @@ class BigFile:
     def __init__(self, datadir):
         self.nr_of_images, self.ndims = map(int, open(os.path.join(datadir,'shape.txt')).readline().split())
         id_file = os.path.join(datadir, "id.txt")
-        self.names = open(id_file).read().strip().split()
+        self.names = open(id_file, 'rb').read().strip().split()
+        for i in range(len(self.names)):
+            self.names[i] = str(self.names[i], encoding='ISO-8859-1')
         assert(len(self.names) == self.nr_of_images)
         self.name2index = dict(zip(self.names, range(self.nr_of_images)))
         self.binary_file = os.path.join(datadir, "feature.bin")
@@ -104,5 +106,5 @@ if __name__ == '__main__':
 
 
     for name,vec in zip(renamed, vectors):
-        print name, vec
+        print(name, vec)
 

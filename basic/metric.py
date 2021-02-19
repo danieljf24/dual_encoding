@@ -140,6 +140,6 @@ if __name__ == "__main__":
 
     sorted_labels = [3, 2, 3, 0, 1, 2]
     scorer = MetricScorer(10)
-    print scorer.name()
-    print scorer.score(sorted_labels)
-    print scorer.getLength(sorted_labels)
+    print(scorer.name())
+    print(scorer.score(sorted_labels))
+    print(scorer.getLength(sorted_labels))

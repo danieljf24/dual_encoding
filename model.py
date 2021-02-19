@@ -5,7 +5,7 @@ import torchvision.models as models
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import torch.backends.cudnn as cudnn
-from torch.nn.utils.clip_grad import clip_grad_norm  # clip_grad_norm_ for 0.4.0, clip_grad_norm for 0.3.1
+from torch.nn.utils.clip_grad import clip_grad_norm_
 import numpy as np
 from collections import OrderedDict
 import torch.nn.functional as F
@@ -305,7 +305,7 @@ class BaseModel(object):
         # compute gradient and do SGD step
         loss.backward()
         if self.grad_clip > 0:
-            clip_grad_norm(self.params, self.grad_clip)
+            clip_grad_norm_(self.params, self.grad_clip)
         self.optimizer.step()
 
         return vid_emb.size(0), loss_value

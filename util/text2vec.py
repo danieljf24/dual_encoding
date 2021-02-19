@@ -2,7 +2,7 @@ import numpy as np
 
 from basic.bigfile import BigFile
 from basic.constant import logger
-from vocab import clean_str
+from util.vocab import clean_str
 
 INFO = __file__
 
