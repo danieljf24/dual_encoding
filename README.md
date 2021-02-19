@@ -7,17 +7,18 @@ Source code of our CVPR'19  paper [Dual Encoding for Zero-Example Video Retrieva
 
 #### Environments
 * **Ubuntu** 16.04
-* **CUDA** 9.0
-* **Python** 2.7
-* **PyTorch** 0.3.1
+* **CUDA** 10.1
+* **Python** 3.7
+* **PyTorch** 1.5.1
 
 We used virtualenv to setup a deep learning workspace that supports PyTorch.
 Run the following script to install the required packages.
 ```shell
-virtualenv --system-site-packages -p python2.7 ~/ws_dual
-source ~/ws_dual/bin/activate
+virtualenv --system-site-packages -p python3.7 ~/ws_dual_py3
+source ~/ws_dual_py3/bin/activate
 git clone https://github.com/danieljf24/dual_encoding.git
 cd ~/dual_encoding
+git checkout python3
 pip install -r requirements.txt
 deactivate
 ```
@@ -43,7 +44,7 @@ Note: Code of video feature extraction is available [here](https://github.com/xu
 ## Getting started
 Run the following script to train and evaluate `Dual Encoding` network on MSR-VTT.
 ```shell
-source ~/ws_dual/bin/activate
+source ~/ws_dual_py3/bin/activate
 ./do_all.sh msrvtt10ktrain msrvtt10kval msrvtt10ktest full
 deactive
 ```
@@ -56,7 +57,7 @@ Running the script will do the following things:
 ## Expected Performance
 Run the following script to evaluate our trained [model(302M)](http://lixirong.net/data/cvpr2019/model_best.pth.tar)  on MSR-VTT.
 ```shell
-source ~/ws_dual/bin/activate
+source ~/ws_dual_py3/bin/activate
 MODELDIR=$HOME/VisualSearch/msrvtt10ktrain/cvpr_2019
 mkdir -p $MODELDIR
 wget -P $MODELDIR http://lixirong.net/data/cvpr2019/model_best.pth.tar
@@ -77,7 +78,7 @@ The expected performance of Dual Encoding on MSR-VTT is as follows. Notice that 
 The msvd dataset (msvd-text-and-resnet-152-img1k.tar.gz) with extracted video feature can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1GoomucXoAmhd3Jhngdnea7t0GOnJoGth?usp=sharing) and [Baidu Pan](https://pan.baidu.com/s/1Z5wgpZQPL2YZakGJsD1Khg).  
 Run the following script to train and evaluate `Dual Encoding` network on MSVD. 
 ```shell
-source ~/ws_dual/bin/activate
+source ~/ws_dual_py3/bin/activate
 ./do_all.sh msvdtrain msvdval msvdtest full
 deactive
 ```
@@ -129,7 +130,7 @@ tar zxvf iacc.3_ResNext-101.tar.gz
 ### Train Dual Encoding model from scratch
 
 ```shell
-source ~/ws_dual/bin/activate
+source ~/ws_dual_py3/bin/activate
 
 trainCollection=tgif-msrvtt10k
 visual_feature=pyresnext-101_rbps13k,flatten0_output,os
@@ -184,7 +185,7 @@ where `train_set`, `val_set` and `test_set` indicate the name of training, valid
 
 If you pass the format check, use the following script to train and evaluate Dual Encoding on your own dataset:
 ```shell
-source ~/ws_dual/bin/activate
+source ~/ws_dual_py3/bin/activate
 ./do_all_own_data.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name} ${caption_num} full
 deactive
 ```
@@ -192,7 +193,7 @@ where `caption_num` denotes the number of captions for each video. For the MSRVT
 
 If training data of your task is relatively limited, we suggest dual encoding with level 2 and 3. Compared to the full edition, this version gives nearly comparable performance on MSR-VTT, but with less trainable parameters.
 ```shell
-source ~/ws_dual/bin/activate
+source ~/ws_dual_py3/bin/activate
 ./do_all_own_data.sh ${train_set} ${val_set} ${test_set} ${rootpath} ${feature_name} ${caption_num} reduced
 deactive
 ```
