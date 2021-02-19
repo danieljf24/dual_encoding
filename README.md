@@ -8,7 +8,7 @@ Source code of our CVPR'19  paper [Dual Encoding for Zero-Example Video Retrieva
 #### Environments
 * **Ubuntu** 16.04
 * **CUDA** 9.0
-* **Python** 2.7
+* **Python** 2.7 (For python 3, please checkout `python3` branch)
 * **PyTorch** 0.3.1
 
 We used virtualenv to setup a deep learning workspace that supports PyTorch.
