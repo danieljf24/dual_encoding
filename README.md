@@ -1,6 +1,8 @@
 # Dual Encoding for Zero-Example Video Retrieval
 Source code of our CVPR'19  paper [Dual Encoding for Zero-Example Video Retrieval](https://arxiv.org/abs/1809.06181).
 
+**Note an improved video-text retrieval model is available [here](https://github.com/danieljf24/hybrid_space).**
+
 ![image](dual_encoding.jpg)
 
 ## Requirements
